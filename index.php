@@ -25,7 +25,7 @@
 if($_POST["cheese"]) 
 {
 	if($_POST["cheese"] == "B")
-    		echo "<br/>That's right!";
+		echo "<br/>That's right!";
 	else
 		echo "<br/>Sorry, that's the wrong answer.";
 }
