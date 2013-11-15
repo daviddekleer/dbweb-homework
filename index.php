@@ -59,12 +59,12 @@ else if($_POST["prev"] && $count > 0)
 </form>
 
 <?php 
-if($_POST["sub"])          // user pressed the submit button
+if($_POST["sub"])              // user pressed the submit button
 {
-    if($_POST["question"]) // an answer is set
+	if($_POST["question"]) // an answer is set
 	{
 		if($_POST["question"] == $answers[$count])
-    		echo "<br/>That's right!";
+			echo "<br/>That's right!";
 		else
 			echo "<br/>Sorry, that's the wrong answer.";
 	}
