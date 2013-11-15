@@ -46,7 +46,7 @@ else if($_POST["prev"] && $count > 0)
 ?>
 
 <p><?php echo $QandA[$count][0]; ?></p>
-<form action=mult1.php method=post>
+<form action=index.php method=post>
 <input type="radio" name="question" value="A"/><?php echo $QandA[$count][1]; ?><br/>
 <input type="radio" name="question" value="B"/><?php echo $QandA[$count][2]; ?><br/>
 <input type="radio" name="question" value="C"/><?php echo $QandA[$count][3]; ?><br/>
