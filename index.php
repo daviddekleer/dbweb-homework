@@ -13,18 +13,18 @@
 <i>Cheese Shop</i> sketch of Monty Python?</p>
 
 <form action=index.php method=post>
-<input type="radio" name="cheese"/>Gouda<br/>
-<input type="radio" name="cheese" value="red"/>Red Leicester<br/>
-<input type="radio" name="cheese"/>Mozzarella<br/>
-<input type="radio" name="cheese"/>Edam<br/>
-<input type="radio" name="cheese"/>Cheshire<br/><br/>
+<input type="radio" name="cheese" value="A"/>Gouda<br/>
+<input type="radio" name="cheese" value="B"/>Red Leicester<br/>
+<input type="radio" name="cheese" value="C"/>Mozzarella<br/>
+<input type="radio" name="cheese" value="D"/>Edam<br/>
+<input type="radio" name="cheese" value="E"/>Cheshire<br/><br/>
 <input type="submit" value="Submit"/>
 </form>
 
 <?php 
 if($_POST["cheese"]) 
 {
-	if($_POST["cheese"] == "red")
+	if($_POST["cheese"] == "B")
     		echo "<br/>That's right!";
 	else
 		echo "<br/>Sorry, that's the wrong answer.";
