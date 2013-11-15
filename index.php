@@ -12,7 +12,7 @@
 <p>What is the name of the first cheese mentioned in the 
 <i>Cheese Shop</i> sketch of Monty Python?</p>
 
-<form action=mchoice.php method=post>
+<form action=index.php method=post>
 <input type="radio" name="cheese"/>Gouda<br/>
 <input type="radio" name="cheese" value="red"/>Red Leicester<br/>
 <input type="radio" name="cheese"/>Mozzarella<br/>
