@@ -16,7 +16,8 @@
 <input type="radio" name="cheese"/>Gouda<br/>
 <input type="radio" name="cheese" value="red"/>Red Leicester<br/>
 <input type="radio" name="cheese"/>Mozzarella<br/>
-<input type="radio" name="cheese"/>Edam<br/><br/>
+<input type="radio" name="cheese"/>Edam<br/>
+<input type="radio" name="cheese"/>Cheshire<br/><br/>
 <input type="submit" value="Submit"/>
 </form>
 
