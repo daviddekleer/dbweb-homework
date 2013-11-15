@@ -1,0 +1,20 @@
+Note: "...", file.php and a_branch are just placeholders. 
+I've only added unique (different) commands to this file.
+
+I've changed the editor (for messages) to nano, by adding the
+line editor = nano to config in .git.
+
+List of commands:
+
+git init
+git add file.php
+git rm -f file.php
+git commit -m "..."
+git commit -a -m "..."
+git log
+git status
+git config --global user.name "David de Kleer"
+git config --global user.email ddekleer@kpnplanet.nl
+git branch a_branch
+git checkout a_branch
+git diff
