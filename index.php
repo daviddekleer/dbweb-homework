@@ -4,31 +4,38 @@
 
 <head>
 <meta charset="UTF-8"/>
-<title>Untitled</title>
+<title>Multiple Choice Questions</title>
 </head>
 
 <body>
-
+ 
 <h2>Some multiple choice questions</h2>
 
 <?php
+
+/* Debugging: uncomment when needed */
+/*
+error_reporting(-1);
+ini_set("display_errors", 1);
+*/
+
 /* All questions (except the first) come from http://www.pubquizarea.com/
  * view_question_and_answer_quizzes.php?cat_title=general-knowledge&
  * type_title=multiple-choice&cat=32&type=1&&id=6272 
  */
 
 $QandA = array(array("What is the name of the first cheese mentioned in".
-          " the <i>Cheese Shop</i> sketch of Monty Python?", "Gouda",
-          "Red Leicester", "Mozzarella", "Edam", "Cheshire"),
-          array("What colour is the pigment chlorophyll?", "Blue",
-          "Red", "Green", "Purple", "Orange"),
-          array("What type of creature is a gecko?", "Bird", "Fish",
-          "Monkey", "Insect", "Lizard"),
-          array("Which US president once claimed to have been". 
-          " 'misunderestimated'?", "George W. Bush", "Jimmy Carter",
-          "Barack Obama", "Gerald Ford", "Ronald Reagan"),
-          array("In which country is the Harz mountain range?", "Austria",
-          "Switzerland", "Spain", "Germany", "Belgium"));
+         " the <i>Cheese Shop</i> sketch of Monty Python?", "Gouda",
+         "Red Leicester", "Mozzarella", "Edam", "Cheshire"),
+         array("What colour is the pigment chlorophyll?", "Blue",
+         "Red", "Green", "Purple", "Orange"),
+         array("What type of creature is a gecko?", "Bird", "Fish",
+         "Monkey", "Insect", "Lizard"),
+         array("Which US president once claimed to have been". 
+         " 'misunderestimated'?", "George W. Bush", "Jimmy Carter",
+         "Barack Obama", "Gerald Ford", "Ronald Reagan"),
+         array("In which country is the Harz mountain range?", "Austria",
+         "Switzerland", "Spain", "Germany", "Belgium"));
 $answers = array("B", "C", "E", "A", "D");
 
 if($_POST["count"])
@@ -59,7 +66,7 @@ else if($_POST["prev"] && $count > 0)
 </form>
 
 <?php 
-if($_POST["sub"])              // user pressed the submit button
+if($_POST["sub"])           // user pressed the submit button
 {
 	if($_POST["question"])  // an answer is set
 	{
