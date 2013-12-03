@@ -39,17 +39,17 @@ $QandA = array(array("What is the name of the first cheese mentioned in".
 $answers = array("B", "C", "E", "A", "D");
 
 if($_POST["count"])
-	// get the value of the hidden "count" input field (if it has been set)
-	$count = $_POST["count"];
+    // get the value of the hidden "count" input field (if it has been set)
+    $count = $_POST["count"];
 else
-	$count = 0;
+    $count = 0;
 
 if($_POST["next"] && $count < count($QandA) - 1) 
-	// user pressed next button and there are more questions
-	$count += 1;
+    // user pressed next button and there are more questions
+    $count += 1;
 else if($_POST["prev"] && $count > 0) 
-	// user pressed previous button and there is a previous question
-	$count -= 1;
+    // user pressed previous button and there is a previous question
+    $count -= 1;
 ?>
 
 <p><?php echo $QandA[$count][0]; ?></p>
@@ -66,15 +66,15 @@ else if($_POST["prev"] && $count > 0)
 </form>
 
 <?php 
-if($_POST["sub"])           // user pressed the submit button
+if($_POST["sub"]) // user pressed the submit button
 {
-	if($_POST["question"])  // an answer is set
-	{
-		if($_POST["question"] == $answers[$count])
-			echo "<br/>That's right!";
-		else
-			echo "<br/>Sorry, that's the wrong answer.";
-	}
+    if($_POST["question"]) // an answer is set
+    {
+        if($_POST["question"] == $answers[$count])
+            echo "<br/>That's right!";
+        else
+            echo "<br/>Sorry, that's the wrong answer.";
+    }
 }
 ?>
 
