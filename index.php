@@ -14,10 +14,10 @@
 <?php
 
 /* Debugging: uncomment when needed */
-/*
+
 error_reporting(-1);
 ini_set("display_errors", 1);
-*/
+
 
 /* All questions (except the first) come from http://www.pubquizarea.com/
  * view_question_and_answer_quizzes.php?cat_title=general-knowledge&
@@ -37,6 +37,7 @@ $QandA = array(array("What is the name of the first cheese mentioned in".
          array("In which country is the Harz mountain range?", "Austria",
          "Switzerland", "Spain", "Germany", "Belgium"));
 $answers = array("B", "C", "E", "A", "D");
+$QandAlen = count($QandA);
 
 if(isset($_POST["count"]))
     // get the value of the hidden "count" input field (if it has been set)
@@ -44,7 +45,7 @@ if(isset($_POST["count"]))
 else
     $count = 0;
 
-if(isset($_POST["next"]) && $count < count($QandA) - 1) 
+if(isset($_POST["next"]) && $count < $QandAlen - 1) 
     // user pressed next button and there are more questions
     $count += 1;
 else if(isset($_POST["prev"]) && $count > 0) 
@@ -53,28 +54,46 @@ else if(isset($_POST["prev"]) && $count > 0)
 ?>
 
 <p><?php echo $QandA[$count][0]; ?></p>
+
 <form action=index.php method=post>
-<input type="radio" name="question" value="A"/><?php echo $QandA[$count][1]; ?><br/>
-<input type="radio" name="question" value="B"/><?php echo $QandA[$count][2]; ?><br/>
-<input type="radio" name="question" value="C"/><?php echo $QandA[$count][3]; ?><br/>
-<input type="radio" name="question" value="D"/><?php echo $QandA[$count][4]; ?><br/>
-<input type="radio" name="question" value="E"/><?php echo $QandA[$count][5]; ?><br/><br/>
+
+<?php
+$answer_values = array('"A"', '"B"', '"C"', '"D"', '"E"');
+for($i = 0; $i < $QandAlen; ++$i) // echo answers to the current question
+    echo '<input type="radio" name="question" value=' . $answer_values[$i] . '/>' . $QandA[$count][$i+1] . '<br/>';
+echo '<br/>';
+?>
+
 <input type="hidden" name="count" value=<?php echo $count; ?> />
 <input type="submit" name="sub" value="Submit"/>
-<input type="submit" name="next" value="Next question"/>
-<input type="submit" name="prev" value="Previous question"/>
+
+<?php
+if($count == 0)                  // first question, hide previous button
+{
+    $next = '"submit"';
+    $prev = '"hidden"';
+}
+else if($count == $QandAlen - 1) // last question, hide next button
+{
+    $next = '"hidden"';
+    $prev = '"submit"';
+} 
+else                             // somewhere in between, show both buttons
+    $next = $prev = '"submit"';
+?>
+
+<input type=<?php echo $prev; ?> name="prev" value="Previous question"/>
+<input type=<?php echo $next; ?> name="next" value="Next question"/>
 </form>
 
 <?php 
-if(isset($_POST["sub"])) // user pressed the submit button
+if(isset($_POST["sub"]) and isset($_POST["question"])) 
+    // user pressed the submit button and an answer is set
 {
-    if(isset($_POST["question"])) // an answer is set
-    {
-        if($_POST["question"] == $answers[$count])
-            echo "<br/>That's right!";
-        else
-            echo "<br/>Sorry, that's the wrong answer.";
-    }
+    if($_POST["question"] == $answers[$count])
+        echo "<br/>That's right!";
+    else
+        echo "<br/>Sorry, that's the wrong answer.";
 }
 ?>
 
