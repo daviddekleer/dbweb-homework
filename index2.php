@@ -51,7 +51,7 @@ setcookie("count", $count);
 <h2>Some multiple choice questions</h2>
 
 <?php
-
+/*
 error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
