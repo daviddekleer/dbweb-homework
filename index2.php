@@ -21,21 +21,22 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
  * type_title=multiple-choice&cat=32&type=1&&id=6272 
  */
 
-//// DEFINE QUESTIONS AND ANSWERS
-$QandA = array(array("What is the name of the first cheese mentioned in".
-         " the <i>Cheese Shop</i> sketch of Monty Python?", "Gouda",
-         "Red Leicester", "Mozzarella", "Edam", "Cheshire"),
-         array("What colour is the pigment chlorophyll?", "Blue",
-         "Red", "Green", "Purple", "Orange"),
-         array("What type of creature is a gecko?", "Bird", "Fish",
-         "Monkey", "Insect", "Lizard"),
-         array("Which US president once claimed to have been". 
-         " 'misunderestimated'?", "George W. Bush", "Jimmy Carter",
-         "Barack Obama", "Gerald Ford", "Ronald Reagan"),
-         array("In which country is the Harz mountain range?", "Austria",
-         "Switzerland", "Spain", "Germany", "Belgium"));
-$answers = array("B", "C", "E", "A", "D");
-$QandAlen = count($QandA);
+// CONNECT TO THE DATABASE
+require_once("db-config.php");
+try
+{ 
+    $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
+    $db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
+}
+catch (PDOException $e)
+{
+    echo "Connection failed, something's wrong: " . $e->getMessage();
+    exit;
+}
+
+$q_handle = $db_handle->query("select count(*) from question");
+$arr = $q_handle->fetch(PDO::FETCH_ASSOC);
+$QandAlen = $arr["count(*)"];
 
 //// KEEP TRACK OF THE QUESTION NUMBER
 if(isset($_POST["count"]))
@@ -52,17 +53,25 @@ else if(isset($_POST["prev"]) && $count > 1)
     // user pressed previous button and there is a previous question
     $count -= 1;
  
-//// SHOW QUESTION CORRESPONDING TO COUNT
-echo "<p>" . $QandA[$count-1][0] . "</p>"; 
+//// FETCH A QUESTION FROM THE DATABASE
+$q_handle = $db_handle->query("select q_text from question where q_number = $count");
+$arr = $q_handle->fetch(PDO::FETCH_ASSOC);
+echo "<p>" . $arr["q_text"] . "</p>";
 ?>
 
-<form action=index.php method=post>
+<form action=index2.php method=post>
 
 <?php
-//// SHOW ANSWERS CORRESPONDING TO COUNT
-$answer_values = array('"A"', '"B"', '"C"', '"D"', '"E"');
-for($i = 0; $i < $QandAlen; ++$i) // echo answers to the current question
-    echo '<input type="radio" name="question" value=' . $answer_values[$i] . '/>' . $QandA[$count-1][$i+1] . '<br/>';
+//// FETCH ANSWERS FROM THE DATABASE
+$q_handle = $db_handle->query("select count(*) from choice where q_number = $count");
+$arr = $q_handle->fetch(PDO::FETCH_ASSOC);
+$answer_amount = $arr["count(*)"]; // questions with a variable amount of answers are possible
+$q_handle = $db_handle->query("select c_text from choice where q_number = $count");
+$arr = $q_handle->fetchAll();
+for($i = 1; $i < $answer_amount+1; ++$i) // echo answers to the current question
+{
+    echo '<input type="radio" name="question" value="' . $i . '"/>' . $arr[$i-1]["c_text"] . '<br/>';
+}
 echo '<br/>';
 
 //// SHOW/HIDE THE PREVIOUS/NEXT BUTTONS
@@ -91,7 +100,9 @@ else                         // somewhere in between, show both buttons
 if(isset($_POST["sub"]) and isset($_POST["question"])) 
     // user pressed the submit button and an answer is set
 {
-    if($_POST["question"] == $answers[$count-1])
+    $q_handle = $db_handle->query("select correct from choice where q_number = $count and c_number = " . $_POST["question"]);
+    $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
+    if($arr["correct"])
         echo "<br/>That's right!";
     else
         echo "<br/>Sorry, that's the wrong answer.";
