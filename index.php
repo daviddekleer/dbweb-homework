@@ -105,11 +105,11 @@ for($i = 1; $i < $answer_amount+1; ++$i) // echo answers to the current question
 echo '<br/>';
 
 //// SHOW/HIDE THE PREVIOUS/NEXT BUTTONS
-/* Note: the type="hidden" trick as in index.php doesn't work if $count is set by
-   cookies. The problem is that if the script arrives at the last question and
-   you press the "Previous question" button, it advances to the next(!) (non-existing)
-   question. That's why I decided to handle it with display:none (then the right 
-   button will be picked).   
+/* Note: the type="hidden" trick as in the first version of index.php doesn't work 
+   if $count is set by cookies. The problem is that if the script arrives at the last 
+   question and you press the "Previous question" button, it advances to the next(!) 
+   (non-existing) question. That's why I decided to handle it with display:none (that 
+   way, the right button will be picked).   
 */
 $next = $prev = "";
 if($count == 1)              // first question, hide previous button
