@@ -33,8 +33,8 @@ if(isset($_POST["sub"]))
         break;
     }
 }
-setcookie("vst", $sessvst);
-setcookie("count", $count);
+setcookie("vst", $sessvst, 0, "", "", 1);
+setcookie("count", $count, 0, "", "", 1);
 ?>
 
 <!DOCTYPE html>
@@ -78,19 +78,25 @@ $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 $Qlen = $arr["count(*)"];
  
 //// FETCH A QUESTION FROM THE DATABASE
-$q_handle = $db_handle->query("select q_text from question where q_number = $count");
+$q_handle = $db_handle->prepare("select q_text from question where q_number = ?");
+$q_handle->bindParam(1, $count);
+$q_handle->execute();
 $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 echo "<p>" . $arr["q_text"] . "</p>";
 ?>
 
-<form action=index2.php method=post>
+<form action=index.php method=post>
 
 <?php
 //// FETCH ANSWERS FROM THE DATABASE
-$q_handle = $db_handle->query("select count(*) from choice where q_number = $count");
+$q_handle = $db_handle->prepare("select count(*) from choice where q_number = ?");
+$q_handle->bindParam(1, $count);
+$q_handle->execute();
 $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 $answer_amount = $arr["count(*)"]; // questions with a variable amount of answers are possible
-$q_handle = $db_handle->query("select c_text from choice where q_number = $count");
+$q_handle = $db_handle->prepare("select c_text from choice where q_number = ?");
+$q_handle->bindParam(1, $count);
+$q_handle->execute();
 $arr = $q_handle->fetchAll();
 for($i = 1; $i < $answer_amount+1; ++$i) // echo answers to the current question
 {
@@ -123,7 +129,10 @@ else if($count == $Qlen) // last question, hide next button
 if(isset($_POST["sub"]) && $_POST["sub"] == "Submit" && isset($_POST["question"])) 
     // user pressed the submit button and an answer is set
 {
-    $q_handle = $db_handle->query("select correct from choice where q_number = $count and c_number = " . $_POST["question"]);
+    $q_handle = $db_handle->prepare("select correct from choice where q_number = ? and c_number = ?");
+    $q_handle->bindParam(1, $count);
+    $q_handle->bindParam(2, $_POST["question"]);
+    $q_handle->execute();
     $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
     if($arr["correct"])
     {
@@ -151,7 +160,7 @@ if(isset($_POST["sub"]) && $_POST["sub"] == "Submit" && isset($_POST["question"]
        at the start of the script (because answers to questions are determined
        the end of this script, not already at the beginning!). Setting a cookie 
        later (like this) doesn't produce any errors on siegfried. */
-    setcookie("score", $score); 
+    setcookie("score", $score, 0, "", "", 1); 
 }
 ?>
 
