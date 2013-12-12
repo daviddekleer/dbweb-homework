@@ -1,8 +1,12 @@
-1. About skipping a question: in my old cookie script, this is a little extra feature (clicking the "Next question" button just gives you 0 points). 
-   Of course, cheating by setting the cookie to a higher value (manually) could be possible (the same holds true for changing the score)! Changing 
-   the score in-between questions was possible with the more "naive" version of my second homework, just by reloading the page and submitting it 
-   again: this kept on increasing the score (I tried to fix it, as you might remember).
-2. Cheating by changing a cookie isn't possible anymore. Now all the data is stored in the PHP $_SESSION array, so unless you're able to access that
-   array, it's not possible to change the score/question number (look at $_SESSION["submitted"] too, which is a flag that checks if a question has 
-   already been submitted somewhere in the past).   
+1. About skipping a question: in my old cookie script, this is a little extra feature (clicking the
+   "Next question" button just gives you 0 points). Of course, cheating by setting the cookie to a 
+   higher value (manually) could be possible (the same holds true for changing the score)! Changing 
+   the score in-between questions was possible with the more "naive" version of my second homework, 
+   just by reloading the page and submitting it again: this kept on increasing the score (I tried 
+   to fix it, as you might remember).
+
+2. Cheating by changing a cookie isn't possible anymore. Now all the data is stored in the PHP 
+   $_SESSION array, so unless you're able to access that array, it's not possible to change the 
+   score/question number (look at $_SESSION["submitted"] too, which is a flag that checks if a 
+   question has already been submitted somewhere in the past).   
    
