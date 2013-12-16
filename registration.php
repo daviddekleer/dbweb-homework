@@ -1,12 +1,3 @@
-<?php
-/* Add a large session timeout. Looks quite dangerous in terms of
- * session ID hijacking (if someone steals your session ID somewhere
- * in the meantime, he/she can continue where you left off).
- */
-//session_set_cookie_params(7*24*3600, "", "", 1); 
-//session_start();
-?>
-
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -27,7 +18,13 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 function printForm() // prints the registration form
 {
-    require('captcha-config.php'); // obtain the public Captcha key
+
+/* The reason I chose to do this instead of just entering plain HTML is
+ * that if a user submits the form successfully, I want the form to 
+ * disappear. But if a user makes a mistake, we still need to be able 
+ * to show the form (so going to another page on submit isn't an option)! */
+
+ require('captcha-config.php'); // obtain the public Captcha key
     $secure = 1;
     echo  '<form action=registration.php method=post>
            <p>Please enter your desired username/password.</p>
@@ -99,7 +96,7 @@ function createUser($db_handle) // put a new user/password hash in the database
     
 require_once('recaptchalib.php');
 
-// CHECK CAPTCHA & INPUT, TRY TO SUBMIT DATA IF VALID
+//// CHECK CAPTCHA & INPUT
 if(CaptchaOK() and validInput())
     // valid Captcha and text entered in input fields, this user is not a spammer!
 {   
@@ -116,6 +113,7 @@ if(CaptchaOK() and validInput())
         exit;
     }
     
+    //// TRY TO ADD USER TO THE DATABASE
     if(userExists($db_handle))
     {
         echo '<p style="color:red"><b>This user already exists! Please try another name...</b></p>';
@@ -130,7 +128,7 @@ if(CaptchaOK() and validInput())
 }
 else // invalid input or first view of registration page
    printForm();
-
+   
 ?>
 
 </body>
