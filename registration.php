@@ -23,13 +23,16 @@
 <p>Please enter some stuff...</p>
 
 <?php
-/*
+
 error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 function printForm() // prints the registration form
 {
-    echo  '<form action=encrypt.php method=post>' . addCaptcha() .
+    require('captcha-config.php'); // obtain the public Captcha key
+    $secure = 1;
+    echo  '<form action=registration.php method=post>' 
+          . recaptcha_get_html($publickey, null, $secure) .
           '<p>Username</p>
           <input type="text" name="username" maxlength="15"/>
           <br/>
@@ -40,20 +43,11 @@ function printForm() // prints the registration form
           </form>';
 }
 
-function addCaptcha() // simple wrapper that adds a Captcha to the page
-{
-    # use SSL (https)
-    $secure = 1;
-    $publickey = "enter public Captcha key";
-    return recaptcha_get_html($publickey, null, $secure);
-}
-
-
 function CaptchaOK() // check if the Captcha value is correct
 {
+    require('captcha-config.php'); // obtain the private Captcha key
     if(isset($_POST["recaptcha_response_field"]))
     {
-        $privatekey = "enter private Captcha key";
         $resp = recaptcha_check_answer($privatekey,
                                        $_SERVER["REMOTE_ADDR"],
                                        $_POST["recaptcha_challenge_field"],
@@ -115,8 +109,6 @@ else // invalid input or first view of registration page
    printForm();
 
 ?>
-
-
 
 </body>
 </html>
