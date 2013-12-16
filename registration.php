@@ -13,14 +13,12 @@
 
 <head>
 <meta charset="UTF-8"/>
-<title>Sample registration page</title>
+<title>M-Choice Registration Page</title>
 </head>
 
 <body>
  
 <h2>Registration</h2>
-
-<p>Please enter some stuff...</p>
 
 <?php
 
@@ -31,16 +29,18 @@ function printForm() // prints the registration form
 {
     require('captcha-config.php'); // obtain the public Captcha key
     $secure = 1;
-    echo  '<form action=registration.php method=post>' 
-          . recaptcha_get_html($publickey, null, $secure) .
-          '<p>Username</p>
-          <input type="text" name="username" maxlength="15"/>
-          <br/>
-          <p>Password</p>
-          <input type="password" name="password" maxlength="30"/>
-          <br/><br/>
-          <input type="submit" name="sub" value="Submit"/>
-          </form>';
+    echo  '<form action=registration.php method=post>
+           <p>Please enter your desired username/password.</p>
+           <p>Username</p>
+           <input type="text" name="username" maxlength="15"/>
+           <br/>
+           <p>Password</p>
+           <input type="password" name="password" maxlength="30"/>
+           <p>Are you human? Prove it :-)</p>'
+           . recaptcha_get_html($publickey, null, $secure) .
+           '<br/>
+           <input type="submit" name="sub" value="Submit"/>
+           </form>';
 }
 
 function CaptchaOK() // check if the Captcha value is correct
@@ -54,7 +54,7 @@ function CaptchaOK() // check if the Captcha value is correct
                                        $_POST["recaptcha_response_field"]);
         if($resp->is_valid) // Captcha correct!
             return 1;
-        echo '<p style="color:red">Sorry, but your Captcha value is incorrect.</p>';
+        echo '<p style="color:red"><b>Sorry, but your Captcha value is incorrect.</b></p>';
         return 0;
     } 
 }
@@ -68,17 +68,42 @@ function validInput() // check if user input is not empty
     {
         if($_POST["username"] != "" && $_POST["password"] != "")
             return 1;
-        echo '<p style="color:red">Please enter a username and a password.</p>';
+        echo '<p style="color:red"><b>Please enter a username and a password.</b></p>';
         return 0;
     }
+}
+
+function userExists($db_handle) // check if user exists in database
+{ 
+    $q_handle = $db_handle->prepare("select name from user where name = ?");
+    $q_handle->bindParam(1, $_POST["username"]);
+    $q_handle->execute();
+    $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
+    if ($arr["name"] == "") // user doesn't exist
+        return 0;
+    return 1; 
+}
+
+function createUser($db_handle) // put a new user/password hash in the database
+{
+    //hash = password_hash($_POST["password"], PASSWORD_DEFAULT); // for future PHP versions
+    require_once("PasswordHash.php"); // PHPass hashing algorithm
+    $hasher = new PasswordHash(12, false);
+    $hash = $hasher->HashPassword($_POST["password"]);
+
+    $q_handle = $db_handle->prepare("insert into user values(?,?)");
+    $q_handle->bindParam(1, $_POST["username"]);
+    $q_handle->bindParam(2, $hash);
+    $q_handle->execute();
 }
     
 require_once('recaptchalib.php');
 
 // CHECK CAPTCHA & INPUT, TRY TO SUBMIT DATA IF VALID
 if(CaptchaOK() and validInput())
-{
-    // Valid Captcha and text entered in input fields, this user is not a spammer!
+    // valid Captcha and text entered in input fields, this user is not a spammer!
+{   
+    //// CONNECT TO THE DATABASE
     require_once("db-config.php");
     try
     { 
@@ -91,18 +116,16 @@ if(CaptchaOK() and validInput())
         exit;
     }
     
-    //// CHECK IF USERNAME EXISTS IN DATABASE    
-    $q_handle = $db_handle->prepare("select name from user where name = ?");
-    $q_handle->bindParam(1, $_POST["username"]);
-    $q_handle->execute();
-    $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
-   
-    if ($arr["name"] == "")
-        echo '<p style="color:green">This user doesn\'t exist!';
+    if(userExists($db_handle))
+    {
+        echo '<p style="color:red"><b>This user already exists! Please try another name...</b></p>';
+        printForm(); // give user another opportunity to enter something else
+    }
     else 
     {
-        echo '<p style="color:red">This user already exists! Please try another name...</p>';
-        printForm(); // give user another opportunity to enter something else
+        createUser($db_handle);
+        echo '<p style="color:green"><b>Success! Welcome to M-Choice!</b><p>
+              <p>Please click <a href="login.php">here</a> to log in.</p>';
     }
 }
 else // invalid input or first view of registration page
