@@ -1,16 +1,11 @@
 <?php
+
+session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
-//session_set_cookie_params(7*24*3600, "", "", 1); 
 
 if(isset($_SESSION["usr"])) 
-    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
-
     // there is still some login session active: redirect to personal page
-    //header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
-/* Add a large session timeout. Looks quite dangerous in terms of
- * session ID hijacking (if someone steals your session ID somewhere
- * in the meantime, he/she can continue where you left off).
- */
+    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
 
 error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
@@ -47,7 +42,7 @@ function validLogin($db_handle) // check if user has entered valid login data
 
 $validarr = validInput();
 $validinput = $validarr[0]; // input valid(1) or not(0)?
-$error = $validarr[1]; // error message returned by validInput
+$error = $validarr[1];      // error message returned by validInput
 
 if ($validinput) 
 {
