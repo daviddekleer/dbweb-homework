@@ -1,17 +1,19 @@
 <?php 
 session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
-if (!isset($_SESSION["expire"]))
-    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
-else
+
+if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
 {
-    if (time() > $_SESSION["expire"]) // time has expired: destroy session
-    {
-        $_SESSION = array();
-        session_destroy();
-    }
-} 
+    // new visit or old session has expired: destroy old session...
+    $_SESSION = array();
+    session_destroy(); 
+    // ...and start a new one
+    session_start();
+}
+    
+$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
 ?>
+
 <!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -26,7 +28,7 @@ else
 <h2>Registration</h2>
 
 <?php
-
+/*
 error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
@@ -154,7 +156,6 @@ if(CaptchaOK() and validInput())
 }
 else // invalid input or first view of registration page
    printForm();
-   
 ?>
 
 </body>

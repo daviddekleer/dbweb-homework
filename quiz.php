@@ -1,16 +1,17 @@
 <?php
 session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
-if (!isset($_SESSION["expire"]))
-    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
-else
+
+if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
 {
-    if (time() > $_SESSION["expire"]) // time has expired: destroy session
-    {
-        $_SESSION = array();
-        session_destroy();
-    }
-}      
+    // new visit or old session has expired: destroy old session...
+    $_SESSION = array();
+    session_destroy(); 
+    // ...and start a new one
+    session_start();
+}
+    
+$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
 ?>
 
 <!DOCTYPE html>
@@ -93,7 +94,7 @@ $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 echo "<p>" . $arr["q_text"] . "</p>";
 ?>
 
-<form action=index.php method=post>
+<form action=quiz.php method=post>
 
 <?php
 //// FETCH ANSWERS FROM THE DATABASE

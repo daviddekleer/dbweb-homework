@@ -5,19 +5,19 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-session_start();
 session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
-if (!isset($_SESSION["expire"]))
-    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
-else
+
+if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
 {
-    if (time() > $_SESSION["expire"]) // time has expired: destroy session
-    {
-        $_SESSION = array();
-        session_destroy();
-    }
-} 
+    // new visit or old session has expired: destroy old session...
+    $_SESSION = array();
+    session_destroy(); 
+    // ...and start a new one/create a new session ID
+    session_start();
+}
+    
+$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
 
 if(isset($_SESSION["usr"])) 
 {
@@ -93,7 +93,6 @@ if ($validinput)
     else
         $error = '<p style="color:red"><b>Username/password incorrect or user does not exist.</b></p>';
 } 
-
 ?>
 
 <!DOCTYPE html>
