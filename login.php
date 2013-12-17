@@ -1,14 +1,29 @@
 <?php
+/*
+error_reporting(-1);
+ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
+//---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
+
+session_start();
 session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
+if (!isset($_SESSION["expire"]))
+    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
+else
+{
+    if (time() > $_SESSION["expire"]) // time has expired: destroy session
+    {
+        $_SESSION = array();
+        session_destroy();
+    }
+} 
 
 if(isset($_SESSION["usr"])) 
     // there is still some login session active: redirect to personal page
     header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
-
-error_reporting(-1);
-ini_set("display_errors", 1); /* Debugging: uncomment if needed */
+    
+//--------------------------------------- FUNCTION DEFINITIONS ----------------------------------------\\
 
 function validInput() // check if user input is not empty
 {
@@ -40,26 +55,33 @@ function validLogin($db_handle) // check if user has entered valid login data
     return 0; 
 }
 
-$validarr = validInput();
-$validinput = $validarr[0]; // input valid(1) or not(0)?
-$error = $validarr[1];      // error message returned by validInput
-
-if ($validinput) 
+function setupDBConnection()
 {
-    //// CONNECT TO THE DATABASE
     require_once("db-config.php");
     try
     { 
         $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-        $db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
+        /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
+        return $db_handle;
     }
     catch (PDOException $e)
     {
         echo "Connection failed, something's wrong: " . $e->getMessage();
         exit;
     }
+}
 
-    if (validLogin($db_handle)) // fire up a new session and move user to their personal page
+//--------------------------------------------- MAIN PART ---------------------------------------------\\
+
+$validarr = validInput();
+$validinput = $validarr[0]; // input valid(1) or not(0)?
+$error = $validarr[1];      // error message returned by validInput
+
+if ($validinput) 
+{
+    $db_handle = setupDBConnection();
+
+    if (validLogin($db_handle)) // regenerate session ID and move user to his/her personal page
     {
         session_regenerate_id();
         $_SESSION["usr"] = $_POST["username"];

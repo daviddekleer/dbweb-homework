@@ -12,9 +12,11 @@
 <h2>Registration</h2>
 
 <?php
-
+/*
 error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
+
+//--------------------------------------- FUNCTION DEFINITIONS ----------------------------------------\\
 
 function printForm() // prints the registration form
 {
@@ -24,7 +26,7 @@ function printForm() // prints the registration form
  * disappear. But if a user makes a mistake, we still need to be able 
  * to show the form (so going to another page on submit isn't an option)! */
 
- require('captcha-config.php'); // obtain the public Captcha key
+    require('captcha-config.php'); // obtain the public Captcha key
     $secure = 1;
     echo  '<form action=registration.php method=post>
            <p>Please enter your desired username/password.</p>
@@ -76,7 +78,7 @@ function userExists($db_handle) // check if user exists in database
     $q_handle->bindParam(1, $_POST["username"]);
     $q_handle->execute();
     $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
-    if ($arr["name"] == "") // user doesn't exist
+    if (empty($arr["name"])) // user doesn't exist
         return 0;
     return 1; 
 }
@@ -93,6 +95,24 @@ function createUser($db_handle) // put a new user/password hash in the database
     $q_handle->bindParam(2, $hash);
     $q_handle->execute();
 }
+
+function setupDBConnection()
+{
+    require_once("db-config.php");
+    try
+    { 
+        $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
+        /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
+        return $db_handle;
+    }
+    catch (PDOException $e)
+    {
+        echo "Connection failed, something's wrong: " . $e->getMessage();
+        exit;
+    }
+}
+
+//--------------------------------------------- MAIN PART ---------------------------------------------\\
     
 require_once('recaptchalib.php');
 
@@ -100,24 +120,13 @@ require_once('recaptchalib.php');
 if(CaptchaOK() and validInput())
     // valid Captcha and text entered in input fields, this user is not a spammer!
 {   
-    //// CONNECT TO THE DATABASE
-    require_once("db-config.php");
-    try
-    { 
-        $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-        /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
-    }
-    catch (PDOException $e)
-    {
-        echo "Connection failed, something's wrong: " . $e->getMessage();
-        exit;
-    }
+    $db_handle = setupDBConnection();
     
     //// TRY TO ADD USER TO THE DATABASE
     if(userExists($db_handle))
     {
         echo '<p style="color:red"><b>This user already exists! Please try another name...</b></p>';
-        printForm(); // give user another opportunity to enter something else
+        printForm(); // give user the opportunity to enter something else
     }
     else 
     {
