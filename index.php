@@ -1,10 +1,17 @@
 <?php
-/* Add a large session timeout. Looks quite dangerous in terms of
- * session ID hijacking (if someone steals your session ID somewhere
- * in the meantime, he/she can continue where you left off).
- */
 session_set_cookie_params(7*24*3600, "", "", 1); 
 session_start();
+
+if (!isset($_SESSION["expire"]))
+    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
+else
+{
+    if (time() > $_SESSION["expire"]) // time has expired: destroy session
+    {
+        $_SESSION = array();
+        session_destroy();
+    }
+} 
 ?>
 
 <!DOCTYPE html>
