@@ -20,8 +20,11 @@ else
 } 
 
 if(isset($_SESSION["usr"])) 
+{
     // there is still some login session active: redirect to personal page
     header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
+    exit;
+}
     
 //--------------------------------------- FUNCTION DEFINITIONS ----------------------------------------\\
 
