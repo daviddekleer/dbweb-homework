@@ -1,17 +1,12 @@
-<?php 
-session_set_cookie_params(7*24*3600, "", "", 1); 
-session_start();
+<?php
+/*
+error_reporting(-1);
+ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
-if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
-{
-    // new visit or old session has expired: destroy old session...
-    $_SESSION = array();
-    session_destroy(); 
-    // ...and start a new one
-    session_start();
-}
-    
-$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
+//---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
+ 
+require_once("phplib/session_dbconnect.php");
+startSession();
 ?>
 
 <!DOCTYPE html>
@@ -28,10 +23,6 @@ $_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
 <h2>Registration</h2>
 
 <?php
-/*
-error_reporting(-1);
-ini_set("display_errors", 1); /* Debugging: uncomment if needed */
-
 //--------------------------------------- FUNCTION DEFINITIONS ----------------------------------------\\
 
 function printForm() // prints the registration form
@@ -42,7 +33,7 @@ function printForm() // prints the registration form
  * disappear. But if a user makes a mistake, we still need to be able 
  * to show the form (so going to another page on submit isn't an option)! */
 
-    require('captcha-config.php'); // obtain the public Captcha key
+    require('phplib/config/captcha-config.php'); // obtain the public Captcha key
     $secure = 1;
     echo  '<form action=registration.php method=post>
            <p>Please enter your desired username/password.</p>
@@ -60,7 +51,7 @@ function printForm() // prints the registration form
 
 function CaptchaOK() // check if the Captcha value is correct
 {
-    require('captcha-config.php'); // obtain the private Captcha key
+    require('phplib/config/captcha-config.php'); // obtain the private Captcha key
     if(isset($_POST["recaptcha_response_field"]))
     {
         $resp = recaptcha_check_answer($privatekey,
@@ -102,7 +93,7 @@ function userExists($db_handle) // check if user exists in database
 function createUser($db_handle) // put a new user/password hash in the database
 {
     //hash = password_hash($_POST["password"], PASSWORD_DEFAULT); // for future PHP versions
-    require_once("PasswordHash.php"); // PHPass hashing algorithm
+    require_once("phplib/PasswordHash.php"); // PHPass hashing algorithm
     $hasher = new PasswordHash(12, false);
     $hash = $hasher->HashPassword($_POST["password"]);
 
@@ -112,25 +103,9 @@ function createUser($db_handle) // put a new user/password hash in the database
     $q_handle->execute();
 }
 
-function setupDBConnection()
-{
-    require_once("db-config.php");
-    try
-    { 
-        $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-        /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
-        return $db_handle;
-    }
-    catch (PDOException $e)
-    {
-        echo "Connection failed, something's wrong: " . $e->getMessage();
-        exit;
-    }
-}
-
 //--------------------------------------------- MAIN PART ---------------------------------------------\\
     
-require_once('recaptchalib.php');
+require_once('phplib/recaptchalib.php');
 
 //// CHECK CAPTCHA & INPUT
 if(CaptchaOK() and validInput())

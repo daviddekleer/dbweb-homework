@@ -5,19 +5,8 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-session_set_cookie_params(7*24*3600, "", "", 1); 
-session_start();
-
-if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
-{
-    // new visit or old session has expired: destroy old session...
-    $_SESSION = array();
-    session_destroy(); 
-    // ...and start a new one/create a new session ID
-    session_start();
-}
-    
-$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
+require_once("phplib/session_dbconnect.php");
+startSession();
 
 if(isset($_SESSION["usr"])) 
 {
@@ -48,7 +37,7 @@ function validLogin($db_handle) // check if user has entered valid login data
     $q_handle->execute();
     $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
     
-    require_once("PasswordHash.php"); // PHPass hashing algorithm
+    require_once("phplib/PasswordHash.php"); // PHPass hashing algorithm
     $hasher = new PasswordHash(12, false);
     $correct = $hasher->CheckPassword($_POST["password"], $arr["password"]);
         // compare entered password and hash
@@ -56,22 +45,6 @@ function validLogin($db_handle) // check if user has entered valid login data
     if (!empty($arr["name"]) && $correct) // login data valid!
         return 1;
     return 0; 
-}
-
-function setupDBConnection()
-{
-    require_once("db-config.php");
-    try
-    { 
-        $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-        /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
-        return $db_handle;
-    }
-    catch (PDOException $e)
-    {
-        echo "Connection failed, something's wrong: " . $e->getMessage();
-        exit;
-    }
 }
 
 //--------------------------------------------- MAIN PART ---------------------------------------------\\

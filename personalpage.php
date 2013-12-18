@@ -1,17 +1,12 @@
 <?php 
-session_set_cookie_params(7*24*3600, "", "", 1); 
-session_start();
+/*
+error_reporting(-1);
+ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
-if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
-{
-    // new visit or old session has expired: destroy old session...
-    $_SESSION = array();
-    session_destroy(); 
-    // ...and start a new one/create a new session ID
-    session_start();
-}
-    
-$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
+//---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
+
+require_once("phplib/session_dbconnect.php");
+startSession();
 
 if(isset($_POST["logout"])) // user wants to log out, kill his/her session
 {

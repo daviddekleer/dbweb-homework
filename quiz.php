@@ -1,17 +1,6 @@
 <?php
-session_set_cookie_params(7*24*3600, "", "", 1); 
-session_start();
-
-if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 
-{
-    // new visit or old session has expired: destroy old session...
-    $_SESSION = array();
-    session_destroy(); 
-    // ...and start a new one
-    session_start();
-}
-    
-$_SESSION["expire"] = time() + 7*24*3600; // set (idle) timeout time
+require_once("phplib/session_dbconnect.php");
+startSession();
 ?>
 
 <!DOCTYPE html>
@@ -65,18 +54,7 @@ if(isset($_POST["sub"]))
 
 $count = $_SESSION["count"];
 
-//// CONNECT TO THE DATABASE
-require_once("db-config.php");
-try
-{ 
-    $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-    /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
-}
-catch (PDOException $e)
-{
-    echo "Connection failed, something's wrong: " . $e->getMessage();
-    exit;
-}
+$db_handle = setupDBConnection();
 
 $q_handle = $db_handle->query("select count(*) from question");
 $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
