@@ -1,17 +1,21 @@
 <?php
-session_set_cookie_params(7*24*3600, "", "", 1); 
-session_start();
+/*
+error_reporting(-1);
+ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
-if (!isset($_SESSION["expire"]))
-    $_SESSION["expire"] = time() + 7*24*3600; // when will the session expire?
-else
+//---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
+
+require_once("phplib/session_dbconnect.php");
+startSession();
+
+if(!isset($_SESSION["usr"])) 
+    // unknown/logged out person visits personal page: redirect to login
 {
-    if (time() > $_SESSION["expire"]) // time has expired: destroy session
-    {
-        $_SESSION = array();
-        session_destroy();
-    }
-} 
+    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/login.php");
+    echo("<p>You have to login to be able to view this page.</p>"); 
+        // if - for whatever reason - someone misleads the header, show info 
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -28,12 +32,9 @@ else
 <h2>Some multiple choice questions</h2>
 
 <?php
-/*
-error_reporting(-1);
-ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //// KEEP TRACK OF THE QUESTION NUMBER AND DO SOME CHEAT PREVENTION
-if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"])) 
+if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"], $_SESSION["store"])) 
 {
     // session variable do not exist yet: initialize them
     $_SESSION["count"] = 1;
@@ -44,6 +45,7 @@ if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"]))
      */
     $_SESSION["submitted"] = 0;
     $_SESSION["score"] = 0;
+    $_SESSION["store"] = array(time(), 0); // array(current time, score stored in database?)
 }
     
 if(isset($_POST["sub"]))
@@ -65,19 +67,9 @@ if(isset($_POST["sub"]))
 
 $count = $_SESSION["count"];
 
-//// CONNECT TO THE DATABASE
-require_once("db-config.php");
-try
-{ 
-    $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
-    /*$db_handle->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); /* useful for debugging */
-}
-catch (PDOException $e)
-{
-    echo "Connection failed, something's wrong: " . $e->getMessage();
-    exit;
-}
+$db_handle = setupDBConnection();
 
+// how many questions are there?
 $q_handle = $db_handle->query("select count(*) from question");
 $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 $Qlen = $arr["count(*)"];
@@ -94,7 +86,7 @@ $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 echo "<p>" . $arr["q_text"] . "</p>";
 ?>
 
-<form action=index.php method=post>
+<form action=quiz.php method=post>
 
 <?php
 //// FETCH ANSWERS FROM THE DATABASE
@@ -145,7 +137,7 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
     $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
     if($arr["correct"])
     {   
-        echo "<br/>That's right!";
+        echo '<br/><p style="color:green"><b>That\'s right!</b></p>';
         if(!$_SESSION["submitted"]) // increase score if the question hasn't been submitted before
             {
             ++$_SESSION["score"];
@@ -153,12 +145,38 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
             }
     }
     else
-        echo "<br/>Sorry, that's the wrong answer.";
+        echo '<br/><p style="color:red"><b>Sorry, that\'s the wrong answer.</b></p>';
         
     if ($count == $Qlen) // display score after answering last question
-            echo "<br/><br/>That's it! Your score is " . $_SESSION["score"] . ".";
+    {
+        echo "<p><b>That's it! Your score is " . $_SESSION["score"] . ".</b></p>";
+        
+        $store = $_SESSION["store"];
+        if(!$store[1]) // check if score of this session has been stored earlier
+        {
+            $time_taken = time() - $store[0];
+            $q_handle = $db_handle->prepare("insert into history values(?,?,?,?)");
+            $q_handle->bindParam(1, $_SESSION["usr"]);
+            $q_handle->bindParam(2, $time_taken);
+            $q_handle->bindParam(3, $_SESSION["score"]);
+            $q_handle->bindParam(4, $store[0]);
+            $q_handle->execute();
+
+            $_SESSION["store"] = array(0, 1); // do not store something again in this session
+        }
+    }
 }
 ?>
+
+<br/>
+<form action=personalpage.php method=post>
+<input type="submit" name="quit" value="Quit"/>
+</form>
+
+<br/>
+<form action=login.php method=post>
+<input type="submit" name="logout" value="Logout"/>
+</form>
 
 </body>
 </html>

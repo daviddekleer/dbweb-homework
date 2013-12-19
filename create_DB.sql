@@ -13,18 +13,11 @@ create table user(name varchar(20),
                   password varchar(255), -- store a hash!
                   primary key(name));
 
-create table first_last_choice(u_name varchar(20),
-                               q_number int,
-                               c_number tinyint,
-                               time_stamp timestamp,
-                               primary key(u_name, q_number, c_number),
-                               foreign key(u_name) references user(name),
-                               foreign key(q_number, c_number) references choice(q_number, c_number));
-
 create table history(u_name varchar(20),
-                     time_taken time,
+                     time_taken int,
                      score int,
-                     primary key(u_name, time_taken, score),
+                     time_started int,
+                     primary key(u_name, time_taken, score, time_started),
                      foreign key(u_name) references user(name));
                      
                                                
