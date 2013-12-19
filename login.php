@@ -8,6 +8,12 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 require_once("phplib/session_dbconnect.php");
 startSession();
 
+if(isset($_POST["logout"])) // user wants to log out (is referred to this page), kill his/her session
+{
+    $_SESSION = array();
+    session_destroy();
+}
+
 if(isset($_SESSION["usr"])) 
 {
     // there is still some login session active: redirect to personal page

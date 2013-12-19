@@ -8,16 +8,14 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 require_once("phplib/session_dbconnect.php");
 startSession();
 
-if(isset($_POST["logout"])) // user wants to log out, kill his/her session
-{
-    $_SESSION = array();
-    session_destroy();
-}
+if(isset($_POST["abort"])) // user chose to abort quiz, unset quiz session variables
+    unset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"]);
 
-if(!isset($_SESSION["usr"])) 
-    // unknown/logged out person visits personal page: redirect to login
+if(!isset($_SESSION["usr"])) // unknown/logged out person visits personal page: redirect to login
 {
     header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/login.php");
+    echo("<p>You have to login to be able to view this page.</p>"); 
+        // if - for whatever reason - someone misleads the header, show info 
     exit;
 }
 ?>
@@ -37,10 +35,10 @@ $escaped_uname = htmlentities($_SESSION["usr"]); // make username safe to output
 ?>
 <p>Welcome, <?php echo $escaped_uname; ?>.</p>
 <form action=quiz.php method=post>
-<input type="submit" name="quiz" value="Take quiz!"/>
+<input type="submit" name="quiz" value="Start/continue quiz!"/>
 </form>
 <br/>
-<form action=personalpage.php method=post>
+<form action=login.php method=post>
 <input type="submit" name="logout" value="Logout"/>
 </form>
 <h3>Your history</h3>

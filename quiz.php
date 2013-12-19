@@ -1,6 +1,20 @@
 <?php
+/*
+error_reporting(-1);
+ini_set("display_errors", 1); /* Debugging: uncomment if needed */
+
+//---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 require_once("phplib/session_dbconnect.php");
 startSession();
+
+if(!isset($_SESSION["usr"])) 
+    // unknown/logged out person visits personal page: redirect to login
+{
+    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/login.php");
+    echo("<p>You have to login to be able to view this page.</p>"); 
+        // if - for whatever reason - someone misleads the header, show info 
+    exit;
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,9 +31,6 @@ startSession();
 <h2>Some multiple choice questions</h2>
 
 <?php
-/*
-error_reporting(-1);
-ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //// KEEP TRACK OF THE QUESTION NUMBER AND DO SOME CHEAT PREVENTION
 if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"])) 
@@ -123,7 +134,7 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
     $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
     if($arr["correct"])
     {   
-        echo "<br/>That's right!";
+        echo '<br/><p style="color:green"><b>That\'s right!</b></p>';
         if(!$_SESSION["submitted"]) // increase score if the question hasn't been submitted before
             {
             ++$_SESSION["score"];
@@ -131,12 +142,22 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
             }
     }
     else
-        echo "<br/>Sorry, that's the wrong answer.";
+        echo '<br/><p style="color:red"><b>Sorry, that\'s the wrong answer.</b></p>';
         
     if ($count == $Qlen) // display score after answering last question
-            echo "<br/><br/>That's it! Your score is " . $_SESSION["score"] . ".";
+            echo "<p><b>That's it! Your score is " . $_SESSION["score"] . ".</b></p>";           
 }
 ?>
+
+<br/>
+<form action=personalpage.php method=post>
+<input type="submit" name="abort" value="Abort quiz"/>
+</form>
+
+<br/>
+<form action=login.php method=post>
+<input type="submit" name="logout" value="Logout"/>
+</form>
 
 </body>
 </html>
