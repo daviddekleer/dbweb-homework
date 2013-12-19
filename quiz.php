@@ -4,6 +4,7 @@ error_reporting(-1);
 ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
+
 require_once("phplib/session_dbconnect.php");
 startSession();
 
@@ -33,7 +34,7 @@ if(!isset($_SESSION["usr"]))
 <?php
 
 //// KEEP TRACK OF THE QUESTION NUMBER AND DO SOME CHEAT PREVENTION
-if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"])) 
+if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"], $_SESSION["store"])) 
 {
     // session variable do not exist yet: initialize them
     $_SESSION["count"] = 1;
@@ -44,6 +45,7 @@ if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"]))
      */
     $_SESSION["submitted"] = 0;
     $_SESSION["score"] = 0;
+    $_SESSION["store"] = array(time(), 0); // array(current time, score stored in database?)
 }
     
 if(isset($_POST["sub"]))
@@ -67,6 +69,7 @@ $count = $_SESSION["count"];
 
 $db_handle = setupDBConnection();
 
+// how many questions are there?
 $q_handle = $db_handle->query("select count(*) from question");
 $arr = $q_handle->fetch(PDO::FETCH_ASSOC);
 $Qlen = $arr["count(*)"];
@@ -145,13 +148,29 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
         echo '<br/><p style="color:red"><b>Sorry, that\'s the wrong answer.</b></p>';
         
     if ($count == $Qlen) // display score after answering last question
-            echo "<p><b>That's it! Your score is " . $_SESSION["score"] . ".</b></p>";           
+    {
+        echo "<p><b>That's it! Your score is " . $_SESSION["score"] . ".</b></p>";
+        
+        $store = $_SESSION["store"];
+        if(!$store[1]) // check if score of this session has been stored earlier
+        {
+            $time_taken = time() - $store[0];
+            $q_handle = $db_handle->prepare("insert into history values(?,?,?,?)");
+            $q_handle->bindParam(1, $_SESSION["usr"]);
+            $q_handle->bindParam(2, $time_taken);
+            $q_handle->bindParam(3, $_SESSION["score"]);
+            $q_handle->bindParam(4, $store[0]);
+            $q_handle->execute();
+
+            $_SESSION["store"] = array(0, 1); // do not store something again in this session
+        }
+    }
 }
 ?>
 
 <br/>
 <form action=personalpage.php method=post>
-<input type="submit" name="abort" value="Abort quiz"/>
+<input type="submit" name="quit" value="Quit"/>
 </form>
 
 <br/>
