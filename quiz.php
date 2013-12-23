@@ -5,13 +5,21 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-require_once("phplib/session_dbconnect.php");
+if(file_exists("phplib/session_dbconnect.php"))
+        require_once("phplib/session_dbconnect.php");
+    else 
+        exit("<p>Sorry, the session management/database connection functions could not be found.</p>"); 
+
+if(file_exists('phplib/config.php'))
+        require('phplib/config.php'); // obtain website url
+    else 
+        exit("<p>Sorry, the configuration file could not be found.</p>");
+
 startSession();
 
-if(!isset($_SESSION["usr"])) 
-    // unknown/logged out person visits personal page: redirect to login
+if(!isset($_SESSION["usr"])) // unknown/logged out person visits personal page: redirect to login
 {
-    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/login.php");
+    header("Location: " . $url . "login.php");
     echo("<p>You have to login to be able to view this page.</p>"); 
         // if - for whatever reason - someone misleads the header, show info 
     exit;
@@ -45,7 +53,7 @@ if(!isset($_SESSION["count"], $_SESSION["submitted"], $_SESSION["score"], $_SESS
      */
     $_SESSION["submitted"] = 0;
     $_SESSION["score"] = 0;
-    $_SESSION["store"] = array(time(), 0); // array(current time, score stored in database?)
+    $_SESSION["store"] = array(time(), 0); // array(current time, bool: score stored in database?)
 }
     
 if(isset($_POST["sub"]))
@@ -151,18 +159,16 @@ if(isset($_POST["sub"], $_POST["answer"]) && $_POST["sub"] == "Submit")
     {
         echo "<p><b>That's it! Your score is " . $_SESSION["score"] . ".</b></p>";
         
-        $store = $_SESSION["store"];
-        if(!$store[1]) // check if score of this session has been stored earlier
+        if(!$_SESSION["store"][1]) // check if score of this session has been stored earlier
         {
-            $time_taken = time() - $store[0];
+            $time_taken = time() - $_SESSION["store"][0];
             $q_handle = $db_handle->prepare("insert into history values(?,?,?,?)");
             $q_handle->bindParam(1, $_SESSION["usr"]);
             $q_handle->bindParam(2, $time_taken);
             $q_handle->bindParam(3, $_SESSION["score"]);
-            $q_handle->bindParam(4, $store[0]);
+            $q_handle->bindParam(4, $_SESSION["store"][0]);
             $q_handle->execute();
-
-            $_SESSION["store"] = array(0, 1); // do not store something again in this session
+            $_SESSION["store"][1] = 1; // do not store something again in this session
         }
     }
 }

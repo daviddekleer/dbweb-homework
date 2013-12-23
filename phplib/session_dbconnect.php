@@ -8,7 +8,11 @@
 
 function setupDBConnection()
 {
-    require_once("config/db-config.php");
+    if(file_exists('phplib/config.php')) // change the location to from where session_dbconnect.php is included!
+        require('phplib/config.php');    // obtain database configuration
+    else 
+        exit("<p>Sorry, the configuration file could not be found.</p>");
+
     try
     { 
         $db_handle = new PDO("mysql:host=$host;dbname=$dbname;", $username, $password);
@@ -24,7 +28,9 @@ function setupDBConnection()
 
 function startSession() // start session and keep track of session expiration
 {
-    session_set_cookie_params(7*24*3600, "", "", 1); 
+    $secure = 1;
+    $httponly = 1;
+    session_set_cookie_params(7*24*3600, "", "", $secure, $httponly); 
     session_start();
 
     if (!isset($_SESSION["expire"]) || (time() > $_SESSION["expire"])) 

@@ -5,7 +5,16 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-require_once("phplib/session_dbconnect.php");
+if(file_exists("phplib/session_dbconnect.php"))
+        require_once("phplib/session_dbconnect.php");
+    else 
+        exit("<p>Sorry, the session management/database connection functions could not be found.</p>"); 
+
+if(file_exists('phplib/config.php'))
+        require('phplib/config.php'); // obtain website url
+    else 
+        exit("<p>Sorry, the configuration file could not be found.</p>");
+        
 startSession();
 
 if(isset($_POST["quit"])) // user chose to quit the quiz, unset quiz session variables
@@ -13,7 +22,7 @@ if(isset($_POST["quit"])) // user chose to quit the quiz, unset quiz session var
 
 if(!isset($_SESSION["usr"])) // unknown/logged out person visits personal page: redirect to login
 {
-    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/login.php");
+    header("Location: " . $url . "login.php");
     echo("<p>You have to login to be able to view this page.</p>"); 
         // if - for whatever reason - someone misleads the header, show info 
     exit;

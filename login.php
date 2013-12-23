@@ -5,7 +5,16 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-require_once("phplib/session_dbconnect.php");
+if(file_exists("phplib/session_dbconnect.php"))
+        require_once("phplib/session_dbconnect.php");
+    else 
+        exit("<p>Sorry, the session management/database connection functions could not be found.</p>"); 
+
+if(file_exists('phplib/config.php'))
+        require('phplib/config.php'); // obtain website url
+    else 
+        exit("<p>Sorry, the configuration file could not be found.</p>");
+        
 startSession();
 
 if(isset($_POST["logout"])) // user wants to log out (is referred to this page), kill his/her session
@@ -17,9 +26,13 @@ if(isset($_POST["logout"])) // user wants to log out (is referred to this page),
 if(isset($_SESSION["usr"])) 
 {
     // there is still some login session active: redirect to personal page
-    header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
+    header("Location: " . $url . "personalpage.php");
     exit;
 }
+
+if(!isset($_SESSION["failattempt"]) || time() - $_SESSION["failattempt"][0] > 300) 
+    // failattempt session variable not set or inactivity for 5 minutes
+    $_SESSION["failattempt"] = array(time(), 0); // array(current time, failed attempt number)  
     
 //--------------------------------------- FUNCTION DEFINITIONS ----------------------------------------\\
 
@@ -59,7 +72,10 @@ $validarr = validInput();
 $validinput = $validarr[0]; // input valid(1) or not(0)?
 $error = $validarr[1];      // error message returned by validInput
 
-if ($validinput) 
+
+if ($_SESSION["failattempt"][1] == 5 && !empty($_POST))
+    $error = '<p style="color:red"><b>Sorry, login failed more than 5 times! Please wait a few minutes.</b></p>';
+else if ($validinput) 
 {
     $db_handle = setupDBConnection();
 
@@ -67,10 +83,14 @@ if ($validinput)
     {
         session_regenerate_id();
         $_SESSION["usr"] = $_POST["username"];
-        header("Location: https://siegfried.webhosting.rug.nl/~s2229730/dbweb-homework/personalpage.php");
+        header("Location: " . $url . "personalpage.php");
     }
     else
+    {
         $error = '<p style="color:red"><b>Username/password incorrect or user does not exist.</b></p>';
+        ++$_SESSION["failattempt"][1];
+        echo $_SESSION["failattempt"][1];
+    }
 } 
 ?>
 
@@ -80,7 +100,7 @@ if ($validinput)
 
 <head>
 <meta charset="UTF-8"/>
-<title>M-Choice Registration Page</title>
+<title>M-Choice Login Page</title>
 </head>
 
 <body>
