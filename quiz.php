@@ -5,10 +5,11 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-if(file_exists("phplib/session_dbconnect.php"))
-        require_once("phplib/session_dbconnect.php");
+if(file_exists("phplib/multfunlib.php"))
+        require_once("phplib/multfunlib.php"); 
+            // contains functions that are used more than once (DB connection, sessions, Captcha's) 
     else 
-        exit("<p>Sorry, the session management/database connection functions could not be found.</p>"); 
+        exit("<p>Sorry, the function library could not be found.</p>"); 
 
 if(file_exists('phplib/config.php'))
         require('phplib/config.php'); // obtain website url

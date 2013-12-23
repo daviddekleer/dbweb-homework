@@ -19,5 +19,7 @@ create table history(u_name varchar(20),
                      time_started int,
                      primary key(u_name, time_taken, score, time_started),
                      foreign key(u_name) references user(name));
-                     
-                                               
+ 
+create table login_attempts(user_ip int unsigned,
+                            attempt int,
+                            primary key(user_ip));

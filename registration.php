@@ -5,10 +5,11 @@ ini_set("display_errors", 1); /* Debugging: uncomment if needed */
 
 //---------------------------------------- SESSION MANAGEMENT -----------------------------------------\\
 
-if(file_exists("phplib/session_dbconnect.php"))
-        require_once("phplib/session_dbconnect.php");
+if(file_exists("phplib/multfunlib.php"))
+        require_once("phplib/multfunlib.php"); 
+            // contains functions that are used more than once (DB connection, sessions, Captcha's) 
     else 
-        exit("<p>Sorry, the session management/database connection functions could not be found.</p>"); 
+        exit("<p>Sorry, the function library could not be found.</p>"); 
 
 startSession();
 ?>
@@ -37,12 +38,6 @@ function printForm() // prints the registration form
  * disappear. But if a user makes a mistake, we still need to be able 
  * to show the form (so going to another page on submit isn't an option)! */
 
-    if(file_exists("phplib/config.php"))
-        require("phplib/config.php"); // obtain the public Captcha key
-    else 
-        exit("<p>Sorry, 2the configuration file could not be found.</p>");
-    
-    $secure = 1;
     echo  '<form action=registration.php method=post>
            <p>Please enter your desired username/password.</p>
            <p>Username</p>
@@ -51,30 +46,10 @@ function printForm() // prints the registration form
            <p>Password</p>
            <input type="password" name="password" maxlength="30"/>
            <p>Are you human? Prove it :-)</p>'
-           . recaptcha_get_html($publickey, null, $secure) .
+           . Captcha() .
            '<br/>
            <input type="submit" name="sub" value="Submit"/>
            </form>';
-}
-
-function CaptchaOK() // check if the Captcha value is correct
-{
-    if(file_exists("phplib/config.php"))
-        require("phplib/config.php"); // obtain the public Captcha key
-    else 
-        exit("<p>Sorry, 1the configuration file could not be found.</p>");
-        
-    if(isset($_POST["recaptcha_response_field"]))
-    {
-        $resp = recaptcha_check_answer($privatekey,
-                                       $_SERVER["REMOTE_ADDR"],
-                                       $_POST["recaptcha_challenge_field"],
-                                       $_POST["recaptcha_response_field"]);
-        if($resp->is_valid) // Captcha correct!
-            return 1;
-        echo '<p style="color:red"><b>Sorry, but your Captcha value is incorrect.</b></p>';
-        return 0;
-    } 
 }
 
 function validInput() // check if user input is not empty
@@ -121,11 +96,6 @@ function createUser($db_handle) // put a new user/password hash in the database
 
 //--------------------------------------------- MAIN PART ---------------------------------------------\\
     
-if(file_exists("phplib/recaptchalib.php"))
-    require("phplib/recaptchalib.php");
-else 
-    exit("<p>Sorry, the Captcha library could not be found.</p>");
-
 //// CHECK CAPTCHA & INPUT
 if(CaptchaOK() and validInput())
     // valid Captcha and text entered in input fields, this user is not a spammer!
